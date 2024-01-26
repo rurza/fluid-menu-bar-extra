@@ -10,7 +10,7 @@ let package = Package(
         .library(
             name: "FluidMenuBarExtra",
             targets: ["FluidMenuBarExtra"]
-        )
+        ),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -20,6 +20,6 @@ let package = Package(
         .target(
             name: "FluidMenuBarExtra",
             dependencies: []
-        )
+        ),
     ]
 )

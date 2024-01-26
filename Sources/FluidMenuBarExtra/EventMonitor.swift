@@ -24,6 +24,7 @@ class EventMonitor {
     func start() {
         fatalError("start must be implemented by a subclass of EventMonitor")
     }
+
     // swiftlint: enable unavailable_function
 
     func stop() {

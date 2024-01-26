@@ -103,7 +103,7 @@ final class FluidMenuBarExtraWindow<Content: View>: NSPanel {
             hostingView.topAnchor.constraint(equalTo: visualEffectView.topAnchor),
             hostingView.trailingAnchor.constraint(equalTo: visualEffectView.trailingAnchor),
             hostingView.bottomAnchor.constraint(equalTo: visualEffectView.bottomAnchor),
-            hostingView.leadingAnchor.constraint(equalTo: visualEffectView.leadingAnchor)
+            hostingView.leadingAnchor.constraint(equalTo: visualEffectView.leadingAnchor),
         ])
     }
 

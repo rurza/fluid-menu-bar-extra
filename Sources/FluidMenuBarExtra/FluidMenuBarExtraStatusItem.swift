@@ -30,7 +30,8 @@ public final class FluidMenuBarExtraStatusItem: NSObject {
         localEventMonitor = LocalEventMonitor(mask: [.leftMouseDown]) { [weak self] event in
             if let button = self?.statusItem.button,
                event.window == button.window,
-               !event.modifierFlags.contains(.command) {
+               !event.modifierFlags.contains(.command)
+            {
                 self?.didPressStatusBarButton(button)
                 // Stop propagating the event so that the button remains highlighted.
                 return nil
@@ -71,7 +72,7 @@ public final class FluidMenuBarExtraStatusItem: NSObject {
         menuBarExtraDelegate?.menuBarExtraBecomeActive()
     }
 
-    private func didPressStatusBarButton(_ sender: NSStatusBarButton) {
+    private func didPressStatusBarButton(_: NSStatusBarButton) {
         toggleWindow()
     }
 
@@ -134,7 +135,7 @@ public final class FluidMenuBarExtraStatusItem: NSObject {
     }
 
     @objc
-    func spaceDidChange(_ note: Notification) {
+    func spaceDidChange(_: Notification) {
         if window.isVisible {
             dismissWindow()
         }

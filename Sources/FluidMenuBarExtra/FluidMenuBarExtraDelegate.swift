@@ -1,6 +1,6 @@
 //
 //  FluidMenuBarExtraDelegate.swift
-//  
+//
 //
 //  Created by Adam on 20/04/2023.
 //
