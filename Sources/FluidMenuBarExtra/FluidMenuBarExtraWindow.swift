@@ -38,17 +38,19 @@ final class FluidMenuBarExtraWindow<Content: View>: NSPanel {
     private var rootView: some View {
         content()
             .modifier(RootViewModifier(windowTitle: title))
-            .onPreferenceChange(ContentSize.self, perform: { [weak self] size in
+            .onSizeUpdate { [weak self] size in
                 self?.contentSizeDidUpdate(to: size)
-            })
+            }
     }
 
     private lazy var hostingView: NSHostingView<some View> = {
         let view = NSHostingView(rootView: rootView)
-
-        view.sizingOptions = [.preferredContentSize]
-//        view.isVerticalContentSizeConstraintActive = false
-//        view.isHorizontalContentSizeConstraintActive = false
+        // Disable NSHostingView's default automatic sizing behavior.
+        if #available(macOS 13, *) {
+            view.sizingOptions = []
+        }
+        view.isVerticalContentSizeConstraintActive = false
+        view.isHorizontalContentSizeConstraintActive = false
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()

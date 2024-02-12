@@ -8,12 +8,37 @@
 
 import SwiftUI
 
-struct ContentSize: PreferenceKey {
-    static var defaultValue: CGSize = .zero
+/// Structure representing an action that is called by a child view to notify a parent view
+/// that one of its children has resized.
+struct UpdateSizeAction {
+    typealias Action = (_ size: CGSize) -> Void
 
-    static func reduce(value: inout CGSize, nextValue: () -> CGSize) {
-        print(#function, " next value: ", nextValue().debugDescription, " existing value: ", value.debugDescription)
-        guard nextValue() != .zero else { return }
-        value = nextValue()
+    let action: Action
+
+    func callAsFunction(size: CGSize) {
+        action(size)
+    }
+}
+
+private struct UpdateSizeKey: EnvironmentKey {
+    static var defaultValue: UpdateSizeAction?
+}
+
+extension EnvironmentValues {
+    var updateSize: UpdateSizeAction? {
+        get { self[UpdateSizeKey.self] }
+        set { self[UpdateSizeKey.self] = newValue }
+    }
+}
+
+extension View {
+    /// Adds an action to perform when a child view reports that it has resized.
+    /// - Parameter action: The action to perform.
+    func onSizeUpdate(_ action: @escaping (_ size: CGSize) -> Void) -> some View {
+        let action = UpdateSizeAction { size in
+            action(size)
+        }
+
+        return environment(\.updateSize, action)
     }
 }
