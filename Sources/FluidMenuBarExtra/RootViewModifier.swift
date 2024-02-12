@@ -19,8 +19,6 @@ import SwiftUI
 /// When applied, the affected view ignores all safe areas so as to fill the space usually occupied
 /// by the title bar.
 struct RootViewModifier: ViewModifier {
-    @Environment(\.updateSize) private var updateSize
-
     @State private var scenePhase: ScenePhase = .background
 
     let windowTitle: String
@@ -31,16 +29,11 @@ struct RootViewModifier: ViewModifier {
             .edgesIgnoringSafeArea(.all)
             .background(
                 GeometryReader { geometry in
+                    let _ = Self._printChanges()
                     Color.clear
-                        .onAppear {
-                            updateSize?(size: geometry.size)
-                        }
-                        .onChange(of: geometry.size) { size in
-                            updateSize?(size: size)
-                        }
+                        .preference(key: ContentSize.self, value: geometry.size)
                 }
             )
-            .fixedSize()
             .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .top)
             .onReceive(NotificationCenter.default.publisher(for: NSWindow.didBecomeKeyNotification)) { notification in
                 guard let window = notification.object as? NSWindow, window.title == windowTitle, scenePhase != .active else {
