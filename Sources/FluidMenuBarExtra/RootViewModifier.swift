@@ -29,7 +29,6 @@ struct RootViewModifier: ViewModifier {
             .edgesIgnoringSafeArea(.all)
             .background(
                 GeometryReader { geometry in
-                    let _ = Self._printChanges()
                     Color.clear
                         .preference(key: ContentSize.self, value: geometry.size)
                 }

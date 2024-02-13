@@ -46,9 +46,9 @@ final class FluidMenuBarExtraWindow<Content: View>: NSPanel {
     private lazy var hostingView: NSHostingView<some View> = {
         let view = NSHostingView(rootView: rootView)
 
-        view.sizingOptions = [.preferredContentSize]
-//        view.isVerticalContentSizeConstraintActive = false
-//        view.isHorizontalContentSizeConstraintActive = false
+        view.sizingOptions = []
+        view.isVerticalContentSizeConstraintActive = false
+        view.isHorizontalContentSizeConstraintActive = false
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
