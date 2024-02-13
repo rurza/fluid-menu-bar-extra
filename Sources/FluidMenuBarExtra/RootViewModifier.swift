@@ -33,6 +33,7 @@ struct RootViewModifier: ViewModifier {
                         .preference(key: ContentSize.self, value: geometry.size)
                 }
             )
+            .fixedSize()
             .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .top)
             .onReceive(NotificationCenter.default.publisher(for: NSWindow.didBecomeKeyNotification)) { notification in
                 guard let window = notification.object as? NSWindow, window.title == windowTitle, scenePhase != .active else {
