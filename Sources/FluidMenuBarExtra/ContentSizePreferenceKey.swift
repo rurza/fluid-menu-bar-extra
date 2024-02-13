@@ -12,7 +12,6 @@ struct ContentSize: PreferenceKey {
     static var defaultValue: CGSize = .zero
 
     static func reduce(value: inout CGSize, nextValue: () -> CGSize) {
-        print(#function, " next value: ", nextValue().debugDescription, " existing value: ", value.debugDescription)
         guard nextValue() != .zero else { return }
         value = nextValue()
     }

@@ -38,9 +38,9 @@ final class FluidMenuBarExtraWindow<Content: View>: NSPanel {
     private var rootView: some View {
         content()
             .modifier(RootViewModifier(windowTitle: title))
-            .onPreferenceChange(ContentSize.self, perform: { [weak self] size in
+            .onPreferenceChange(ContentSize.self) { [weak self] size in
                 self?.contentSizeDidUpdate(to: size)
-            })
+            }
     }
 
     private lazy var hostingView: NSHostingView<some View> = {
