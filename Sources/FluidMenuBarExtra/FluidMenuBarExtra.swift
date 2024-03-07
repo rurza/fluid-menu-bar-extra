@@ -33,8 +33,10 @@ import SwiftUI
 /// Instead, define state properties inside child views, or pass published properties from
 /// your application delegate to the child views using the `environmentObject`
 /// modifier.
+@MainActor
 public final class FluidMenuBarExtra {
     public let statusItem: FluidMenuBarExtraStatusItem
+    private var task: Task<Void, Never>?
 
     public init(
         title: String,
@@ -44,6 +46,7 @@ public final class FluidMenuBarExtra {
         let window = FluidMenuBarExtraWindow(title: title, content: content)
         statusItem = FluidMenuBarExtraStatusItem(title: title, window: window)
         statusItem.menuBarExtraDelegate = menuBarExtraDelegate
+        setUpObserving()
     }
 
     public init(
@@ -55,6 +58,7 @@ public final class FluidMenuBarExtra {
         let window = FluidMenuBarExtraWindow(title: title, content: content)
         statusItem = FluidMenuBarExtraStatusItem(title: title, image: image, window: window)
         statusItem.menuBarExtraDelegate = menuBarExtraDelegate
+        setUpObserving()
     }
 
     public init(
@@ -66,9 +70,23 @@ public final class FluidMenuBarExtra {
         let window = FluidMenuBarExtraWindow(title: title, content: content)
         statusItem = FluidMenuBarExtraStatusItem(title: title, systemImage: systemImage, window: window)
         statusItem.menuBarExtraDelegate = menuBarExtraDelegate
+        setUpObserving()
     }
 
     public func toggleMenuBarExtra() {
         statusItem.toggleWindow()
     }
+
+    private func setUpObserving() {
+        task = Task.detached { [weak self] in
+            for await _ in NotificationCenter.default.notifications(named: .fluidMenuBarExtraToggle) {
+                await self?.toggleMenuBarExtra()
+            }
+        }
+    }
+
+    deinit {
+        task?.cancel()
+    }
 }
+
