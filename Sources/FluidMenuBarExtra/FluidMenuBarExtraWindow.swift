@@ -5,7 +5,7 @@
 //  Created by Lukas Romsicki on 2022-12-16.
 //  Copyright © 2022 Lukas Romsicki.
 //
-
+#if canImport(AppKit)
 import AppKit
 import SwiftUI
 
@@ -125,3 +125,5 @@ final class FluidMenuBarExtraWindow<Content: View>: NSPanel {
         }
     }
 }
+
+#endif

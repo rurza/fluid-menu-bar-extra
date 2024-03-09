@@ -6,6 +6,8 @@
 //  Copyright © 2022 Lukas Romsicki.
 //
 
+#if canImport(AppKit)
+
 import SwiftUI
 
 /// A view modifier that reads the size of its content and posts a notification when
@@ -51,3 +53,5 @@ struct RootViewModifier: ViewModifier {
             }
     }
 }
+
+#endif

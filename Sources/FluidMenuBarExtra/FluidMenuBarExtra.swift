@@ -5,7 +5,7 @@
 //  Created by Lukas Romsicki on 2022-12-17.
 //  Copyright © 2022 Lukas Romsicki.
 //
-
+#if canImport(AppKit)
 import SwiftUI
 
 /// A class you use to create a SwiftUI menu bar extra in both SwiftUI and non-SwiftUI
@@ -88,4 +88,4 @@ public final class FluidMenuBarExtra {
         task?.cancel()
     }
 }
-
+#endif

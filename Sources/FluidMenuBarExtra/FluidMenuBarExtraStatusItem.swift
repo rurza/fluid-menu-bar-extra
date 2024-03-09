@@ -5,7 +5,7 @@
 //  Created by Lukas Romsicki on 2022-12-17.
 //  Copyright © 2022 Lukas Romsicki.
 //
-
+#if canImport(AppKit)
 import AppKit
 import SwiftUI
 
@@ -73,6 +73,7 @@ public final class FluidMenuBarExtraStatusItem: NSObject {
     }
 
     private func didPressStatusBarButton(_: NSStatusBarButton) {
+        print(#function)
         toggleWindow()
     }
 
@@ -172,3 +173,5 @@ private extension Notification.Name {
 private enum Metrics {
     static let windowBorderSize: CGFloat = 2
 }
+
+#endif

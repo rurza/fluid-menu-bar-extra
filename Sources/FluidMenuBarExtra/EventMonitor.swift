@@ -6,6 +6,7 @@
 //  Copyright © 2022 Lukas Romsicki.
 //
 
+#if canImport(AppKit)
 import AppKit
 
 class EventMonitor {
@@ -46,7 +47,12 @@ final class LocalEventMonitor: EventMonitor {
     }
 
     override func start() {
-        monitor = NSEvent.addLocalMonitorForEvents(matching: mask, handler: handler)
+        monitor = NSEvent.addLocalMonitorForEvents(
+            matching: mask,
+            handler: { [weak self] event in
+                return self?.handler(event)
+            }
+        )
     }
 }
 
@@ -64,3 +70,4 @@ final class GlobalEventMonitor: EventMonitor {
         monitor = NSEvent.addGlobalMonitorForEvents(matching: mask, handler: handler)
     }
 }
+#endif
