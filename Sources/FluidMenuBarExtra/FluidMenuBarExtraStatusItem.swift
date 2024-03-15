@@ -73,7 +73,6 @@ public final class FluidMenuBarExtraStatusItem: NSObject {
     }
 
     private func didPressStatusBarButton(_: NSStatusBarButton) {
-        print(#function)
         toggleWindow()
     }
 
