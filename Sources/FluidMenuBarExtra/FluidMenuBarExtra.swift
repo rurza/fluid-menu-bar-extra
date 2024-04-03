@@ -77,7 +77,7 @@ public final class FluidMenuBarExtra {
     }
 
     private func setUpObserving() {
-        task = Task.detached { [weak self] in
+        task = Task { @MainActor [weak self] in
             for await _ in NotificationCenter.default.notifications(named: .fluidMenuBarExtraToggle) {
                 await self?.toggleMenuBarExtra()
             }
