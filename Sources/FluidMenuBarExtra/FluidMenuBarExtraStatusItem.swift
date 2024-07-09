@@ -143,24 +143,23 @@ public final class FluidMenuBarExtraStatusItem: NSObject {
 }
 
 extension FluidMenuBarExtraStatusItem {
-    convenience init(title: String, window: NSWindow) {
+    convenience init(title: String, image: NSImage?, window: NSWindow) {
         self.init(window: window)
 
-        statusItem.button?.title = title
         statusItem.button?.setAccessibilityTitle(title)
+        statusItem.button?.image = image
+    }
+    
+    convenience init(title: String, window: NSWindow) {
+        self.init(title: title, image: nil, window: window)
     }
 
     convenience init(title: String, image: String, window: NSWindow) {
-        self.init(window: window)
-
-        statusItem.button?.setAccessibilityTitle(title)
-        statusItem.button?.image = NSImage(named: image)
+        self.init(title: title, image: NSImage(named: image), window: window)
     }
 
     convenience init(title: String, systemImage: String, window: NSWindow) {
-        self.init(window: window)
-        statusItem.button?.setAccessibilityTitle(title)
-        statusItem.button?.image = NSImage(systemSymbolName: systemImage, accessibilityDescription: title)
+       self.init(title: title, image: NSImage(systemSymbolName: systemImage, accessibilityDescription: title), window: window)
     }
 }
 

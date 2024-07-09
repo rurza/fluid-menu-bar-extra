@@ -72,6 +72,14 @@ public final class FluidMenuBarExtra {
         setUpObserving()
     }
 
+    public init(title: String, image: NSImage, menuBarExtraDelegate: FluidMenuBarExtraDelegate? = nil,
+                @ViewBuilder content: @escaping () -> some View) {
+        let window = FluidMenuBarExtraWindow(title: title, content: content)
+        statusItem = FluidMenuBarExtraStatusItem(title: title, image: image, window: window)
+        statusItem.menuBarExtraDelegate = menuBarExtraDelegate
+        setUpObserving()
+    }
+
     public func toggleMenuBarExtra() {
         statusItem.toggleWindow()
     }
@@ -79,7 +87,7 @@ public final class FluidMenuBarExtra {
     private func setUpObserving() {
         task = Task { @MainActor [weak self] in
             for await _ in NotificationCenter.default.notifications(named: .fluidMenuBarExtraToggle) {
-                await self?.toggleMenuBarExtra()
+                self?.toggleMenuBarExtra()
             }
         }
     }
