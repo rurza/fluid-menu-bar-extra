@@ -84,6 +84,10 @@ public final class FluidMenuBarExtra {
         statusItem.toggleWindow()
     }
 
+    public func dismissPopover() {
+        statusItem.dismissIfVisible()
+    }
+
     private func setUpObserving() {
         task = Task { @MainActor [weak self] in
             for await _ in NotificationCenter.default.notifications(named: .fluidMenuBarExtraToggle) {

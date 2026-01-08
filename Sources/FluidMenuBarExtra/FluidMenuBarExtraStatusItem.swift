@@ -72,6 +72,12 @@ public final class FluidMenuBarExtraStatusItem: NSObject {
         menuBarExtraDelegate?.menuBarExtraBecomeActive()
     }
 
+    func dismissIfVisible() {
+        if window.isVisible {
+            dismissWindow()
+        }
+    }
+
     private func didPressStatusBarButton(_: NSStatusBarButton) {
         toggleWindow()
     }
