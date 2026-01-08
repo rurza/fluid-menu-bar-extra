@@ -59,7 +59,7 @@ public final class FluidMenuBarExtraStatusItem: NSObject {
         setButtonHighlighted(to: true)
         // Tells the system to persist the menu bar in full screen mode.
         DistributedNotificationCenter.default().post(name: .beginMenuTracking, object: nil)
-        window.orderFront(nil)
+        window.makeKeyAndOrderFront(nil)
         globalEventMonitor?.start()
         NSWorkspace.shared
             .notificationCenter

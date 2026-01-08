@@ -13,29 +13,28 @@ import SwiftUI
 ///
 /// `FluidMenuBarExtraWindow` listens for changes to the size of its content and
 /// automatically adjusts its frame to match.
-final class FluidMenuBarExtraWindow<Content: View>: NSPanel {
+final class FluidMenuBarExtraWindow<Content: View>: NSWindow {
     private let content: () -> Content
 
     /// On macOS 26+, we skip vibrancy views entirely to let SwiftUI's .glassEffect() work.
     /// On older versions, we use NSVisualEffectView for the classic popover appearance.
     private lazy var backgroundView: NSView = {
+        let view: NSView
         if #available(macOS 26.0, *) {
             // Plain view - SwiftUI content handles its own glass effects
-            let view = NSView()
-            view.wantsLayer = true
-            view.translatesAutoresizingMaskIntoConstraints = true
-            return view
+            view = NSView()
         } else {
-            let view = NSVisualEffectView()
-            view.wantsLayer = true
-            view.blendingMode = .behindWindow
-            view.state = .active
-            view.material = .popover
-            view.translatesAutoresizingMaskIntoConstraints = true
-            view.layer?.cornerRadius = 12
-            view.layer?.cornerCurve = .continuous
-            return view
+            let visualView = NSVisualEffectView()
+            visualView.blendingMode = .behindWindow
+            visualView.state = .active
+            visualView.material = .popover
+            view = visualView
         }
+        view.wantsLayer = true
+        view.translatesAutoresizingMaskIntoConstraints = true
+        view.layer?.cornerRadius = 12
+        view.layer?.cornerCurve = .continuous
+        return view
     }()
 
     private var rootView: some View {
@@ -72,7 +71,6 @@ final class FluidMenuBarExtraWindow<Content: View>: NSPanel {
 
         isMovable = false
         isMovableByWindowBackground = false
-        isFloatingPanel = true
         level = .statusBar
         isOpaque = false
         backgroundColor = .clear
@@ -123,6 +121,11 @@ final class FluidMenuBarExtraWindow<Content: View>: NSPanel {
         DispatchQueue.main.async { [weak self] in
             self?.setFrame(nextFrame, display: true, animate: true)
         }
+    }
+
+    // Allow borderless window to become key so SwiftUI controls render in active state
+    override var canBecomeKey: Bool {
+        true
     }
 }
 
