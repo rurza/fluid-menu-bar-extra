@@ -80,6 +80,24 @@ public final class FluidMenuBarExtra {
         setUpObserving()
     }
 
+    /// Creates a menu bar extra with a custom view as the status item button content.
+    /// - Parameters:
+    ///   - title: The title of the menu bar extra.
+    ///   - buttonView: A custom NSView to display in the status item button.
+    ///   - menuBarExtraDelegate: An optional delegate to receive callbacks.
+    ///   - content: A SwiftUI view to display in the popover.
+    public init(
+        title: String,
+        buttonView: NSView,
+        menuBarExtraDelegate: FluidMenuBarExtraDelegate? = nil,
+        @ViewBuilder content: @escaping () -> some View
+    ) {
+        let window = FluidMenuBarExtraWindow(title: title, content: content)
+        statusItem = FluidMenuBarExtraStatusItem(title: title, buttonView: buttonView, window: window)
+        statusItem.menuBarExtraDelegate = menuBarExtraDelegate
+        setUpObserving()
+    }
+
     public func toggleMenuBarExtra() {
         statusItem.toggleWindow()
     }

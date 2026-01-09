@@ -19,6 +19,11 @@ public final class FluidMenuBarExtraStatusItem: NSObject {
     private var localEventMonitor: EventMonitor?
     private var globalEventMonitor: EventMonitor?
 
+    /// Closure that determines whether a click event should toggle the popover.
+    /// Return `true` to handle the click (toggle popover), `false` to let it pass through.
+    /// If not set, all clicks toggle the popover.
+    public var shouldHandleClick: ((NSEvent) -> Bool)?
+
     private init(window: NSWindow) {
         self.window = window
 
@@ -32,6 +37,11 @@ public final class FluidMenuBarExtraStatusItem: NSObject {
                event.window == button.window,
                !event.modifierFlags.contains(.command)
             {
+                // Check if we should handle this click
+                if let shouldHandle = self?.shouldHandleClick, !shouldHandle(event) {
+                    // Let the event pass through to subviews
+                    return event
+                }
                 self?.didPressStatusBarButton(button)
                 // Stop propagating the event so that the button remains highlighted.
                 return nil
@@ -39,8 +49,13 @@ public final class FluidMenuBarExtraStatusItem: NSObject {
             return event
         }
 
-        globalEventMonitor = GlobalEventMonitor(mask: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
-            self?.dismissWindow()
+        globalEventMonitor = GlobalEventMonitor(mask: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
+            guard let self else { return }
+            // Don't dismiss if clicking inside the popover window
+            if event.window == self.window {
+                return
+            }
+            self.dismissWindow()
         }
 
         localEventMonitor?.start()
@@ -60,6 +75,8 @@ public final class FluidMenuBarExtraStatusItem: NSObject {
         // Tells the system to persist the menu bar in full screen mode.
         DistributedNotificationCenter.default().post(name: .beginMenuTracking, object: nil)
         window.makeKeyAndOrderFront(nil)
+        // Activate the app using the modern API
+        NSRunningApplication.current.activate(options: .activateIgnoringOtherApps)
         globalEventMonitor?.start()
         NSWorkspace.shared
             .notificationCenter
@@ -155,7 +172,7 @@ extension FluidMenuBarExtraStatusItem {
         statusItem.button?.setAccessibilityTitle(title)
         statusItem.button?.image = image
     }
-    
+
     convenience init(title: String, window: NSWindow) {
         self.init(title: title, image: nil, window: window)
     }
@@ -166,6 +183,22 @@ extension FluidMenuBarExtraStatusItem {
 
     convenience init(title: String, systemImage: String, window: NSWindow) {
        self.init(title: title, image: NSImage(systemSymbolName: systemImage, accessibilityDescription: title), window: window)
+    }
+
+    /// Creates a status item with a custom view as the button content.
+    /// - Parameters:
+    ///   - title: The accessibility title for the status item.
+    ///   - buttonView: A custom NSView to display in the status item button.
+    ///   - window: The window to display when the status item is clicked.
+    convenience init(title: String, buttonView: NSView, window: NSWindow) {
+        self.init(window: window)
+
+        statusItem.button?.setAccessibilityTitle(title)
+        if let button = statusItem.button {
+            buttonView.frame = button.bounds
+            buttonView.autoresizingMask = [.width, .height]
+            button.addSubview(buttonView)
+        }
     }
 }
 
