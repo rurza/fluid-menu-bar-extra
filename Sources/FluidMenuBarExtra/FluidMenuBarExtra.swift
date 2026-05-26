@@ -37,6 +37,13 @@ public final class FluidMenuBarExtra {
     public let statusItem: FluidMenuBarExtraStatusItem
     private var task: Task<Void, Never>?
 
+    /// - Parameter autosaveName: Persists the user's chosen menu bar position
+    ///   across launches via `NSStatusItem.autosaveName`. Renaming this string
+    ///   after release orphans every user's saved position — keep it stable.
+    /// - Parameter defaultPreferredPosition: Seed value for the corresponding
+    ///   `"NSStatusItem Preferred Position <autosaveName>"` UserDefaults key.
+    ///   Written only on first launch (when the key has no value). Ignored when
+    ///   `autosaveName` is `nil`.
     public init(
         title: String,
         autosaveName: String? = nil,
@@ -55,6 +62,13 @@ public final class FluidMenuBarExtra {
         setUpObserving()
     }
 
+    /// - Parameter autosaveName: Persists the user's chosen menu bar position
+    ///   across launches via `NSStatusItem.autosaveName`. Renaming this string
+    ///   after release orphans every user's saved position — keep it stable.
+    /// - Parameter defaultPreferredPosition: Seed value for the corresponding
+    ///   `"NSStatusItem Preferred Position <autosaveName>"` UserDefaults key.
+    ///   Written only on first launch (when the key has no value). Ignored when
+    ///   `autosaveName` is `nil`.
     public init(
         title: String,
         image: String,
@@ -75,6 +89,13 @@ public final class FluidMenuBarExtra {
         setUpObserving()
     }
 
+    /// - Parameter autosaveName: Persists the user's chosen menu bar position
+    ///   across launches via `NSStatusItem.autosaveName`. Renaming this string
+    ///   after release orphans every user's saved position — keep it stable.
+    /// - Parameter defaultPreferredPosition: Seed value for the corresponding
+    ///   `"NSStatusItem Preferred Position <autosaveName>"` UserDefaults key.
+    ///   Written only on first launch (when the key has no value). Ignored when
+    ///   `autosaveName` is `nil`.
     public init(
         title: String,
         systemImage: String,
