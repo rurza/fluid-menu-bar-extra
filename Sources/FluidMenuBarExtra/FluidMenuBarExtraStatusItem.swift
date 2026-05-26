@@ -19,10 +19,25 @@ public final class FluidMenuBarExtraStatusItem: NSObject {
     private var localEventMonitor: EventMonitor?
     private var globalEventMonitor: EventMonitor?
 
-    private init(window: NSWindow) {
+    private init(
+        window: NSWindow,
+        autosaveName: String?,
+        defaultPreferredPosition: CGFloat?
+    ) {
         self.window = window
 
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+
+        if let autosaveName {
+            statusItem.autosaveName = autosaveName
+            if let defaultPreferredPosition {
+                let positionKey = "NSStatusItem Preferred Position \(autosaveName)"
+                if UserDefaults.standard.object(forKey: positionKey) == nil {
+                    UserDefaults.standard.set(defaultPreferredPosition, forKey: positionKey)
+                }
+            }
+        }
+
         statusItem.isVisible = true
 
         super.init()
@@ -143,22 +158,51 @@ public final class FluidMenuBarExtraStatusItem: NSObject {
 }
 
 extension FluidMenuBarExtraStatusItem {
-    convenience init(title: String, window: NSWindow) {
-        self.init(window: window)
+    convenience init(
+        title: String,
+        window: NSWindow,
+        autosaveName: String?,
+        defaultPreferredPosition: CGFloat?
+    ) {
+        self.init(
+            window: window,
+            autosaveName: autosaveName,
+            defaultPreferredPosition: defaultPreferredPosition
+        )
 
         statusItem.button?.title = title
         statusItem.button?.setAccessibilityTitle(title)
     }
 
-    convenience init(title: String, image: String, window: NSWindow) {
-        self.init(window: window)
+    convenience init(
+        title: String,
+        image: String,
+        window: NSWindow,
+        autosaveName: String?,
+        defaultPreferredPosition: CGFloat?
+    ) {
+        self.init(
+            window: window,
+            autosaveName: autosaveName,
+            defaultPreferredPosition: defaultPreferredPosition
+        )
 
         statusItem.button?.setAccessibilityTitle(title)
         statusItem.button?.image = NSImage(named: image)
     }
 
-    convenience init(title: String, systemImage: String, window: NSWindow) {
-        self.init(window: window)
+    convenience init(
+        title: String,
+        systemImage: String,
+        window: NSWindow,
+        autosaveName: String?,
+        defaultPreferredPosition: CGFloat?
+    ) {
+        self.init(
+            window: window,
+            autosaveName: autosaveName,
+            defaultPreferredPosition: defaultPreferredPosition
+        )
         statusItem.button?.setAccessibilityTitle(title)
         statusItem.button?.image = NSImage(systemSymbolName: systemImage, accessibilityDescription: title)
     }

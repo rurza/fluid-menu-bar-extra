@@ -39,11 +39,18 @@ public final class FluidMenuBarExtra {
 
     public init(
         title: String,
+        autosaveName: String? = nil,
+        defaultPreferredPosition: CGFloat? = nil,
         menuBarExtraDelegate: FluidMenuBarExtraDelegate? = nil,
         @ViewBuilder content: @escaping () -> some View
     ) {
         let window = FluidMenuBarExtraWindow(title: title, content: content)
-        statusItem = FluidMenuBarExtraStatusItem(title: title, window: window)
+        statusItem = FluidMenuBarExtraStatusItem(
+            title: title,
+            window: window,
+            autosaveName: autosaveName,
+            defaultPreferredPosition: defaultPreferredPosition
+        )
         statusItem.menuBarExtraDelegate = menuBarExtraDelegate
         setUpObserving()
     }
@@ -51,11 +58,19 @@ public final class FluidMenuBarExtra {
     public init(
         title: String,
         image: String,
+        autosaveName: String? = nil,
+        defaultPreferredPosition: CGFloat? = nil,
         menuBarExtraDelegate: FluidMenuBarExtraDelegate? = nil,
         @ViewBuilder content: @escaping () -> some View
     ) {
         let window = FluidMenuBarExtraWindow(title: title, content: content)
-        statusItem = FluidMenuBarExtraStatusItem(title: title, image: image, window: window)
+        statusItem = FluidMenuBarExtraStatusItem(
+            title: title,
+            image: image,
+            window: window,
+            autosaveName: autosaveName,
+            defaultPreferredPosition: defaultPreferredPosition
+        )
         statusItem.menuBarExtraDelegate = menuBarExtraDelegate
         setUpObserving()
     }
@@ -63,11 +78,19 @@ public final class FluidMenuBarExtra {
     public init(
         title: String,
         systemImage: String,
+        autosaveName: String? = nil,
+        defaultPreferredPosition: CGFloat? = nil,
         menuBarExtraDelegate: FluidMenuBarExtraDelegate? = nil,
         @ViewBuilder content: @escaping () -> some View
     ) {
         let window = FluidMenuBarExtraWindow(title: title, content: content)
-        statusItem = FluidMenuBarExtraStatusItem(title: title, systemImage: systemImage, window: window)
+        statusItem = FluidMenuBarExtraStatusItem(
+            title: title,
+            systemImage: systemImage,
+            window: window,
+            autosaveName: autosaveName,
+            defaultPreferredPosition: defaultPreferredPosition
+        )
         statusItem.menuBarExtraDelegate = menuBarExtraDelegate
         setUpObserving()
     }
