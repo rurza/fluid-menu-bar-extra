@@ -21,5 +21,9 @@ let package = Package(
             name: "FluidMenuBarExtra",
             dependencies: []
         ),
+        .testTarget(
+            name: "FluidMenuBarExtraTests",
+            dependencies: ["FluidMenuBarExtra"]
+        ),
     ]
 )

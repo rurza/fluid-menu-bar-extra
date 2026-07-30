@@ -70,6 +70,10 @@ public final class FluidMenuBarExtraStatusItem: NSObject {
             dismissWindow()
             return
         }
+
+        // Recover from degenerate (collapsed) frame before opening
+        (window as? PopoverWindowRecovery)?.recoverIfDegenerate()
+
         setWindowPosition()
         setButtonHighlighted(to: true)
         // Tells the system to persist the menu bar in full screen mode.
