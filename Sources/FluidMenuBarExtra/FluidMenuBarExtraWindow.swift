@@ -168,7 +168,21 @@ final class FluidMenuBarExtraWindow<Content: View>: NSWindow, PopoverWindowRecov
 
             if let targetFrame = self.pendingFrame {
                 self.pendingFrame = nil
-                self.setFrame(targetFrame, display: true, animate: true)
+                // `setFrame(_:display:animate:)` animates in *blocking* mode: it spins a private
+                // run loop in `NSEventTrackingRunLoopMode` and force-displays every step, holding
+                // the main thread for the entire resize — measured at ~310ms while the window is
+                // visible, and ~0.1ms while ordered out, which is why this only bites on screen.
+                // Anything else animating at that moment freezes for the duration: a settings
+                // toggle that changed a section, an AppKit switch knob mid-travel, motion artwork
+                // playing in the popover, any concurrent SwiftUI transition.
+                //
+                // The animator proxy runs the same duration and ease-in-ease-out curve off the
+                // run loop, so it looks identical without blocking.
+                NSAnimationContext.runAnimationGroup { context in
+                    context.duration = self.animationResizeTime(targetFrame)
+                    context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+                    self.animator().setFrame(targetFrame, display: true)
+                }
             }
         }
     }
