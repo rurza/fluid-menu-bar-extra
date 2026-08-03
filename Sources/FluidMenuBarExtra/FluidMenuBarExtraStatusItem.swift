@@ -24,6 +24,10 @@ public final class FluidMenuBarExtraStatusItem: NSObject {
     /// If not set, all clicks toggle the popover.
     public var shouldHandleClick: ((NSEvent) -> Bool)?
 
+    /// True from the start of a dismissal until its fade-out completes. `window.isVisible`
+    /// stays true for the whole 0.3s fade, so it cannot serve as the re-entrancy guard.
+    private var isDismissing = false
+
     private init(window: NSWindow) {
         self.window = window
 
@@ -32,19 +36,54 @@ public final class FluidMenuBarExtraStatusItem: NSObject {
 
         super.init()
 
-        localEventMonitor = LocalEventMonitor(mask: [.leftMouseDown]) { [weak self] event in
-            if let button = self?.statusItem.button,
-               event.window == button.window,
-               !event.modifierFlags.contains(.command)
-            {
+        localEventMonitor = LocalEventMonitor(mask: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
+            guard let self else { return event }
+
+            // (1) Our own status item's button window. This branch owns the click completely:
+            // both of its escapes — cmd-click (rearranging the item) and `shouldHandleClick`
+            // returning false (a custom button view that toggles via its own callback) — hand
+            // the event to AppKit *without* falling into (2). That is what keeps a single click
+            // on the icon to exactly one toggle instead of dismiss-then-reopen.
+            if let button = self.statusItem.button, event.window === button.window {
+                guard event.type == .leftMouseDown,
+                      !event.modifierFlags.contains(.command)
+                else { return event }
+
                 // Check if we should handle this click
-                if let shouldHandle = self?.shouldHandleClick, !shouldHandle(event) {
+                if let shouldHandle = self.shouldHandleClick, !shouldHandle(event) {
                     // Let the event pass through to subviews
                     return event
                 }
-                self?.didPressStatusBarButton(button)
+                self.didPressStatusBarButton(button)
                 // Stop propagating the event so that the button remains highlighted.
                 return nil
+            }
+
+            // (2) Any other click landing in this app dismisses the popover — the same thing the
+            // global monitor already does for other applications, and the same thing a real
+            // NSMenu does.
+            //
+            // The global monitor alone cannot cover this: `addGlobalMonitorForEvents` is only
+            // delivered clicks destined for OTHER applications, which arrive with a nil
+            // `event.window`. Clicks in one of our own windows never reach it — except for one
+            // case that made the old behaviour look intermittent rather than simply missing.
+            // `makeKeyAndOrderFront` on this borderless `.statusBar`-level window does not make
+            // the app frontmost to the window server, so the app is left "pending activation",
+            // and the next mouse-down on one of our normal-level windows is an *activating*
+            // click that IS delivered to the global monitor — carrying a non-nil `event.window`
+            // the old `event.window == self.window` guard did not catch. Result: the popover was
+            // dismissed by the first click in another of our windows after being reopened, but
+            // not if something had already activated the app (e.g. opening a window
+            // programmatically with `NSApp.activate`). Handling it here makes it consistent.
+            //
+            // No carve-out is needed for menus opened from the popover. NSMenu tracking runs a
+            // nested event loop that consumes every mouse-down itself: between
+            // `didBeginTracking` and `didEndTracking` this monitor receives nothing at all.
+            // Verified on macOS 26 for clicking a menu item, clicking the popover, and clicking
+            // another of our windows while a menu is up — all three produce zero local-monitor
+            // events, so an open submenu can never dismiss the popover out from under itself.
+            if event.window !== self.window {
+                self.dismissWindow()
             }
             return event
         }
@@ -104,6 +143,15 @@ public final class FluidMenuBarExtraStatusItem: NSObject {
     }
 
     private func dismissWindow() {
+        // Idempotent. Several dismissals can now race for a single open: with two status items
+        // both local monitors see the same click (monitors run in registration order, and only a
+        // `nil` return stops later ones), and `dismissIfVisible()` can arrive from the sibling
+        // item while this one is still fading. A second pass would restart the 0.3s fade and
+        // post a second `menuBarExtraWasDeactivated()`, so a host counting open/close pairs
+        // would be decremented for an open it never saw.
+        guard window.isVisible, !isDismissing else { return }
+        isDismissing = true
+
         setButtonHighlighted(to: false)
         // Tells the system to cancel persisting the menu bar in full screen mode.
         DistributedNotificationCenter.default().post(name: .endMenuTracking, object: nil)
@@ -123,6 +171,7 @@ public final class FluidMenuBarExtraStatusItem: NSObject {
         } completionHandler: { [weak self] in
             self?.window.orderOut(nil)
             self?.window.alphaValue = 1
+            self?.isDismissing = false
         }
         menuBarExtraDelegate?.menuBarExtraWasDeactivated()
     }
