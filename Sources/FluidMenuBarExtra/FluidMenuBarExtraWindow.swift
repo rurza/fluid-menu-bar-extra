@@ -166,8 +166,33 @@ final class FluidMenuBarExtraWindow<Content: View>: NSWindow, PopoverWindowRecov
             guard let self else { return }
             self.hasPendingResize = false
 
-            if let targetFrame = self.pendingFrame {
+            if let pending = self.pendingFrame {
                 self.pendingFrame = nil
+
+                // `pending` was computed from the frame as it stood when SwiftUI reported the new
+                // content size — a runloop turn ago. On the open path `setWindowPosition()` runs
+                // in exactly that gap, so applying `pending`'s origin verbatim silently undoes the
+                // move: the popover is positioned correctly and then dragged back to wherever it
+                // happened to be sitting, which on the first open after launch is off screen.
+                // Only the size is still meaningful; re-derive the origin from where the window
+                // actually is now, keeping its top-left anchored.
+                var targetFrame = PopoverPlacementPolicy.rebase(pendingFrame: pending, onto: self.frame)
+
+                // A resize keeps the left edge, so a window positioned while it was narrower than
+                // its final width grows off the trailing edge. Pull it back.
+                if let visibleFrame = (self.screen ?? NSScreen.main)?.visibleFrame {
+                    targetFrame = PopoverPlacementPolicy.clampHorizontally(targetFrame, to: visibleFrame)
+                }
+
+                guard targetFrame != self.frame else { return }
+
+                // Off screen there is nothing to animate, and an in-flight animation is precisely
+                // what outlives `setWindowPosition()` and overrides it. Land it synchronously.
+                guard self.isVisible else {
+                    self.setFrame(targetFrame, display: false)
+                    return
+                }
+
                 // `setFrame(_:display:animate:)` animates in *blocking* mode: it spins a private
                 // run loop in `NSEventTrackingRunLoopMode` and force-displays every step, holding
                 // the main thread for the entire resize — measured at ~310ms while the window is

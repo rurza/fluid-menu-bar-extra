@@ -181,33 +181,27 @@ public final class FluidMenuBarExtraStatusItem: NSObject {
     }
 
     private func setWindowPosition() {
-        guard let statusItemWindow = statusItem.button?.window else {
-            // If we don't know where the status item is, just place the window in the center.
+        let statusItemWindow = statusItem.button?.window
+
+        guard let screen = statusItemWindow?.screen ?? NSScreen.main else {
+            // No screen to anchor against at all.
             window.center()
             return
         }
 
-        var targetRect = statusItemWindow.frame
+        // `statusItemWindow?.frame` is deliberately passed through unchecked: the policy decides
+        // whether it is a usable anchor. It is not one for the first few runloop turns after the
+        // status item is created or recreated — it reports a zero-height frame at the origin,
+        // then one with a negative `origin.y` — and anchoring to either strands the popover off
+        // screen. The policy falls back to the menu bar's trailing edge in that case.
+        let topLeft = PopoverPlacementPolicy.popoverTopLeft(
+            statusItemFrame: statusItemWindow?.frame,
+            popoverWidth: window.frame.width,
+            screenVisibleFrame: screen.visibleFrame,
+            borderSize: Metrics.windowBorderSize
+        )
 
-        if let screen = statusItemWindow.screen {
-            let windowWidth = window.frame.width
-
-            if statusItemWindow.frame.origin.x + windowWidth > screen.visibleFrame.width {
-                targetRect.origin.x += statusItemWindow.frame.width
-                targetRect.origin.x -= windowWidth
-
-                // Offset by window border size to align with highlighted button.
-                targetRect.origin.x += Metrics.windowBorderSize
-            } else {
-                // Offset by window border size to align with highlighted button.
-                targetRect.origin.x -= Metrics.windowBorderSize
-            }
-        } else {
-            // If there's no screen, assume default positioning.
-            targetRect.origin.x -= Metrics.windowBorderSize
-        }
-
-        window.setFrameTopLeftPoint(targetRect.origin)
+        window.setFrameTopLeftPoint(topLeft)
     }
 
     @objc
