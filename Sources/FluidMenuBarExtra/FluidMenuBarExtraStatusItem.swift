@@ -74,7 +74,14 @@ public final class FluidMenuBarExtraStatusItem: NSObject {
         setButtonHighlighted(to: true)
         // Tells the system to persist the menu bar in full screen mode.
         DistributedNotificationCenter.default().post(name: .beginMenuTracking, object: nil)
-        window.orderFront(nil)
+        window.makeKeyAndOrderFront(nil)
+        // `makeKeyAndOrderFront` alone is not enough: on a borderless
+        // `.statusBar`-level window it does not make the app frontmost to the
+        // window server, so an LSUIElement host is left "pending activation" and
+        // keystrokes keep going to whatever app was frontmost. Text fields then
+        // only work after a click inside the panel, and main-menu key
+        // equivalents never arrive at all.
+        NSRunningApplication.current.activate(options: .activateIgnoringOtherApps)
         globalEventMonitor?.start()
         NSWorkspace.shared
             .notificationCenter

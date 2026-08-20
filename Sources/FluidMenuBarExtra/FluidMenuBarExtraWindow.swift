@@ -105,6 +105,12 @@ final class FluidMenuBarExtraWindow<Content: View>: NSPanel {
         ])
     }
 
+    /// A borderless window is not eligible for key status by default, so the
+    /// panel would only be ordered front and never focused.
+    override var canBecomeKey: Bool {
+        true
+    }
+
     private func contentSizeDidUpdate(to size: CGSize) {
         var nextFrame = frame
         let previousContentSize = contentRect(forFrameRect: frame).size
